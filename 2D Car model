@@ -1,0 +1,191 @@
+#include<glad/glad.h>
+#include<glfw/glfw3.h>
+#include<math.h>
+#include<iostream>
+
+
+void frame_buffer_resize_callBack(GLFWwindow* window, int BW, int BH)
+{
+	glViewport(0, 0, BW, BH);
+}
+void Circle(float x, float y, float r);
+void Circle2(float x, float y, float r);
+
+const char* vertexShaderSource = "#version 330 core \n"
+"layout(location = 0) in vec3 aPos; \n"
+
+"void main() \n"
+"{ \n"
+"gl_Position = vec4(aPos, 1.0f); \n"
+"} \0";
+
+const char* FragmentshaderSource = "#version 330 core \n"
+"out vec4 FragColor; \n"
+
+"void main() \n"
+"{ \n"
+"FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); \n"
+"} \0";
+
+void Init()
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, 500, 0, 500, -1, 1);
+}
+int main()
+{
+	glfwInit();
+
+	static int height = 600;
+	static int weidth = 800;
+
+	GLFWwindow* window = glfwCreateWindow(weidth, height, "new Window", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "window is not created : " << std::endl;
+		glfwTerminate();
+		return 0;
+	}
+
+	glfwSetFramebufferSizeCallback(window, frame_buffer_resize_callBack);
+	glfwMakeContextCurrent(window);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "faild to initilization glad " << std::endl;
+	}
+
+	unsigned int vertexShader;
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	glCompileShader(vertexShader);
+
+	int success;
+	char infolog[512];
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, 512, NULL, infolog);
+		std::cout << "ERROR::SHADER::VERTEX::COMPILITION::FAILED " << infolog << " " << std::endl;
+	}
+
+	unsigned int fragementShader;
+	fragementShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragementShader, 1, &FragmentshaderSource, NULL);
+	glCompileShader(fragementShader);
+
+	glGetShaderiv(fragementShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(fragementShader, 512, NULL, infolog);
+		std::cout << "ERROR::SHADER::FRAGEMEMT::COMPLITION FAILED  " << infolog << " " << std::endl;
+	}
+
+	unsigned int shaderProgram;
+	shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragementShader);
+	glLinkProgram(shaderProgram);
+	float vertex[] = {
+		//Bottom
+		100, 100, 0,
+		100, 160, 0,
+		450, 160, 0,
+		450, 100, 0,
+		
+		150, 160, 0,
+		200, 200, 0,
+		400, 200, 0,
+		450, 160, 0,
+
+	};
+
+	unsigned int indices[] = {
+		0, 1, 4, 5,
+		6, 7, 2, 3,
+	};
+
+	//bottom
+	unsigned int VBO,EBO,VAO;
+	glGenBuffers(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 3 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	while (!glfwWindowShouldClose(window))
+	{
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		Init();
+		Circle(200, 100, 30);
+		Circle2(350, 100, 30);
+																																																																																				
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		//glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_LINE_LOOP,8, GL_UNSIGNED_INT, 0);
+		//glDrawArrays(GL_LINE_LOOP, 0, 4);
+		//glDrawArrays(GL_LINE_LOOP, 5, 8);
+
+
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+	glfwTerminate();
+	return 0;
+}
+void Circle(float x, float y, float r)
+{
+	int i;
+	int lineAmount = 100;
+
+	float twicePi = 2.0f * 3.14;
+
+	glBegin(GL_LINE_LOOP);
+
+	for (i = 0; i <= lineAmount; i++)
+	{
+		glVertex2f(
+			x + (r * cos(i * twicePi / lineAmount)),
+			y + (r * sin(i * twicePi / lineAmount))
+		);
+	}
+	glEnd();
+
+
+}
+void Circle2(float x, float y, float r)
+{
+	int i;
+	int lineAmount = 100;
+
+	float twicePi = 2.0f * 3.14;
+
+	glBegin(GL_LINE_LOOP);
+
+	for (i = 0; i <= lineAmount; i++)
+	{
+		glVertex2f(
+			x + (r * cos(i * twicePi / lineAmount)),
+			y + (r * sin(i * twicePi / lineAmount))
+		);
+	}
+	glEnd();
+
+
+}
